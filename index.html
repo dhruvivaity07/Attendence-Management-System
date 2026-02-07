@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Management System</title>
+    <style>
+        /* ===== GLOBAL STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* ===== CONNECTION STATUS ===== */
+        .connection-status {
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .status-connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* ===== NAVIGATION TABS ===== */
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 18px;
+            background: transparent;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            background: white;
+        }
+
+        /* ===== TAB CONTENT ===== */
+        .tab-content {
+            display: none;
+            padding: 40px;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== FORM STYLES ===== */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1em;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* ===== RADIO BUTTONS ===== */
+        .radio-group {
+            display: flex;
+            gap: 30px;
+            margin-top: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        /* ===== ALERTS ===== */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        /* ===== TABLE STYLES ===== */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 1em;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-present {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .status-absent {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        /* ===== STATISTICS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+
+        /* ===== INSTRUCTIONS ===== */
+        .instructions {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .instructions h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #856404;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>📚 Student Attendance System</h1>
+            <p>Manage student records and track attendance efficiently</p>
+        </header>
+
+        <!-- CONNECTION STATUS -->
+        <div id="connectionStatus" class="connection-status status-disconnected">
+            🔄 Checking backend connection...
+        </div>
+
+        <!-- NAVIGATION TABS -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab('register')">👤 Register Student</button>
+            <button class="tab-button" onclick="openTab('mark')">✓ Mark Attendance</button>
+            <button class="tab-button" onclick="openTab('view')">📊 View Records</button>
+            <button class="tab-button" onclick="openTab('stats')">📈 Statistics</button>
+        </div>
+
+        <!-- TAB 1: REGISTER STUDENT -->
+        <div id="register" class="tab-content active">
+            <div class="card">
+                <h3>Register New Student</h3>
+                <div id="register-alert"></div>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="rollNumber">Roll Number *</label>
+                        <input type="text" id="rollNumber" placeholder="e.g., 101" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentName">Student Name *</label>
+                        <input type="text" id="studentName" placeholder="e.g., John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="className">Class/Section *</label>
+                        <input type="text" id="className" placeholder="e.g., 10-A" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Register Student</button>
+                    <button type="reset" class="btn btn-secondary">Clear Form</button>
+                </form>
+            </div>
+
+            <div class="instructions">
+                <h3>📝 Instructions</h3>
+                <ol>
+                    <li>Fill in all the required fields</li>
+                    <li>Roll number must be unique</li>
+                    <li>After registration, the student will be saved to the system</li>
+                    <li>You can then mark attendance for this student</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- TAB 2: MARK ATTENDANCE -->
+        <div id="mark" class="tab-content">
+            <div class="card">
+                <h3>Mark Daily Attendance</h3>
+                <div id="mark-alert"></div>
+                <form id="attendanceForm">
+                    <div class="form-group">
+                        <label for="markRollNumber">Roll Number *</label>
+                        <input type="text" id="markRollNumber" placeholder="Enter student roll number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="attendanceDate">Date *</label>
+                        <input type="date" id="attendanceDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="present" name="status" value="Present" required>
+                                <label for="present">✓ Present</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="absent" name="status" value="Absent">
+                                <label for="absent">✗ Absent</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">Submit Attendance</button>
+                    <button type="reset" class="btn btn-secondary">Clear Form</button>
+                </form>
+            </div>
+
+            <div class="instructions">
+                <h3>📝 Instructions</h3>
+                <ol>
+                    <li>Enter the roll number of the registered student</li>
+                    <li>Select the date for attendance</li>
+                    <li>Choose Present or Absent status</li>
+                    <li>Cannot mark duplicate attendance for the same date</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- TAB 3: VIEW RECORDS -->
+        <div id="view" class="tab-content">
+            <div class="card">
+                <h3>Student Records</h3>
+                <button onclick="loadStudents()" class="btn btn-primary">🔄 Refresh Student List</button>
+                <div class="table-container">
+                    <table id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Name</th>
+                                <th>Class/Section</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsBody">
+                            <tr>
+                                <td colspan="3" style="text-align: center; color: #6c757d;">No students registered yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Attendance Records</h3>
+                <button onclick="loadAttendance()" class="btn btn-primary">🔄 Refresh Attendance</button>
+                <div class="table-container">
+                    <table id="attendanceTable">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceBody">
+                            <tr>
+                                <td colspan="3" style="text-align: center; color: #6c757d;">No attendance records yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: STATISTICS -->
+        <div id="stats" class="tab-content">
+            <div class="card">
+                <h3>Calculate Attendance Percentage</h3>
+                <div id="stats-alert"></div>
+                <form id="statsForm">
+                    <div class="form-group">
+                        <label for="statsRollNumber">Roll Number *</label>
+                        <input type="text" id="statsRollNumber" placeholder="Enter roll number" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Calculate Percentage</button>
+                </form>
+
+                <div id="statsResult" style="display: none; margin-top: 30px;">
+                    <h3>Attendance Summary</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4 id="totalClasses">0</h4>
+                            <p>Total Classes</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4 id="presentCount">0</h4>
+                            <p>Classes Attended</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4 id="absentCount">0</h4>
+                            <p>Classes Missed</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4 id="percentage">0%</h4>
+                            <p>Attendance %</p>
+                        </div>
+                    </div>
+                    <div id="attendanceStatus" style="margin-top: 20px; text-align: center; font-size: 1.2em; font-weight: 600;"></div>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h3>📝 How to Use</h3>
+                <ol>
+                    <li>Enter the student's roll number</li>
+                    <li>Click "Calculate Percentage"</li>
+                    <li>View total classes, present/absent days, and percentage</li>
+                    <li>Percentage = (Present Days / Total Days) × 100</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ===== CONFIGURATION ===== */
+        const API_URL = 'http://localhost:8081/api';
+        let useBackend = false;
+
+        /* ===== INITIALIZATION ===== */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date to today
+            document.getElementById('attendanceDate').valueAsDate = new Date();
+            
+            // Check backend connection
+            checkBackendConnection();
+            
+            // Load data from localStorage as fallback
+            loadFromLocalStorage();
+            
+            // Setup form event listeners
+            setupEventListeners();
+        });
+
+        /* ===== BACKEND CONNECTION ===== */
+        async function checkBackendConnection() {
+            try {
+                const response = await fetch(`${API_URL}?action=getStudents`);
+                const data = await response.json();
+                
+                if (data.success !== undefined) {
+                    useBackend = true;
+                    updateConnectionStatus(true);
+                    showAlert('register-alert', '✅ Connected to C backend server', 'success');
+                    
+                    // Load data from backend
+                    loadStudents();
+                    loadAttendance();
+                    return true;
+                }
+            } catch (error) {
+                console.error('Backend not available:', error);
+                useBackend = false;
+                updateConnectionStatus(false);
+                showAlert('register-alert', '⚠️ Using local storage (backend not available)', 'warning');
+                return false;
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusDiv = document.getElementById('connectionStatus');
+            if (connected) {
+                statusDiv.className = 'connection-status status-connected';
+                statusDiv.innerHTML = '✅ Connected to Backend Server (C Program Running on Port 8081)';
+            } else {
+                statusDiv.className = 'connection-status status-disconnected';
+                statusDiv.innerHTML = '⚠️ Backend Disconnected - Using Local Storage Only';
+            }
+        }
+
+        /* ===== TAB NAVIGATION ===== */
+        function openTab(tabName) {
+            const tabs = document.getElementsByClassName('tab-content');
+            for (let tab of tabs) {
+                tab.classList.remove('active');
+            }
+            
+            const buttons = document.getElementsByClassName('tab-button');
+            for (let btn of buttons) {
+                btn.classList.remove('active');
+            }
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        /* ===== EVENT LISTENERS SETUP ===== */
+        function setupEventListeners() {
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            document.getElementById('attendanceForm').addEventListener('submit', handleMarkAttendance);
+            document.getElementById('statsForm').addEventListener('submit', handleCalculateStats);
+        }
+
+        /* ===== REGISTER STUDENT ===== */
+        async function handleRegister(e) {
+            e.preventDefault();
+            
+            const rollNumber = document.getElementById('rollNumber').value.trim();
+            const studentName = document.getElementById('studentName').value.trim();
+            const className = document.getElementById('className').value.trim();
+            
+            if (!rollNumber || !studentName || !className) {
+                showAlert('register-alert', 'Please fill all fields!', 'error');
+                return;
+            }
+            
+            const formData = {
+                rollNumber: rollNumber,
+                name: studentName,
+                className: className
+            };
+            
+            let success = false;
+            
+            if (useBackend) {
+                try {
+                    const response = await fetch(`${API_URL}/addStudent`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(formData).toString()
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        success = true;
+                        showAlert('register-alert', `✅ ${data.message}`, 'success');
+                        saveToLocalStorage('students', formData);
+                    } else {
+                        showAlert('register-alert', `❌ ${data.error}`, 'error');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Backend error:', error);
+                    useBackend = false;
+                    updateConnectionStatus(false);
+                }
+            }
+            
+            if (!success) {
+                // Check duplicate in localStorage
+                const students = JSON.parse(localStorage.getItem('students') || '[]');
+                if (students.some(s => s.rollNumber === rollNumber)) {
+                    showAlert('register-alert', 'Roll number already exists!', 'error');
+                    return;
+                }
+                
+                saveToLocalStorage('students', formData);
+                showAlert('register-alert', `✅ Student ${studentName} registered successfully!`, 'success');
+            }
+            
+            document.getElementById('registerForm').reset();
+        }
+
+        /* ===== MARK ATTENDANCE ===== */
+        async function handleMarkAttendance(e) {
+            e.preventDefault();
+            
+            const rollNumber = document.getElementById('markRollNumber').value.trim();
+            const date = document.getElementById('attendanceDate').value;
+            const status = document.querySelector('input[name="status"]:checked');
+            
+            if (!rollNumber || !date || !status) {
+                showAlert('mark-alert', 'Please fill all fields!', 'error');
+                return;
+            }
+            
+            const formData = {
+                rollNumber: rollNumber,
+                date: date,
+                status: status.value
+            };
+            
+            let success = false;
+            
+            if (useBackend) {
+                try {
+                    const response = await fetch(`${API_URL}/markAttendance`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(formData).toString()
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        success = true;
+                        showAlert('mark-alert', `✅ ${data.message}`, 'success');
+                        saveToLocalStorage('attendance', formData);
+                    } else {
+                        showAlert('mark-alert', `❌ ${data.error}`, 'error');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Backend error:', error);
+                    useBackend = false;
+                    updateConnectionStatus(false);
+                }
+            }
+            
+            if (!success) {
+                // Validate student exists
+                const students = JSON.parse(localStorage.getItem('students') || '[]');
+                if (!students.some(s => s.rollNumber === rollNumber)) {
+                    showAlert('mark-alert', 'Student not found! Please register first.', 'error');
+                    return;
+                }
+                
+                // Check duplicate
+                const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+                if (attendance.some(a => a.rollNumber === rollNumber && a.date === date)) {
+                    showAlert('mark-alert', 'Attendance already marked for this date!', 'error');
+                    return;
+                }
+                
+                saveToLocalStorage('attendance', formData);
+                showAlert('mark-alert', `✅ Attendance marked as ${status.value} for Roll No: ${rollNumber}`, 'success');
+            }
+            
+            document.getElementById('attendanceForm').reset();
+            document.getElementById('attendanceDate').valueAsDate = new Date();
+        }
+
+        /* ===== LOAD STUDENTS ===== */
+        async function loadStudents() {
+            let students = [];
+            
+            if (useBackend) {
+                try {
+                    const response = await fetch(`${API_URL}?action=getStudents`);
+                    const data = await response.json();
+                    if (data.success && data.students) {
+                        students = data.students;
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch students:', error);
+                    students = JSON.parse(localStorage.getItem('students') || '[]');
+                }
+            } else {
+                students = JSON.parse(localStorage.getItem('students') || '[]');
+            }
+            
+            const tbody = document.getElementById('studentsBody');
+            
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #6c757d;">No students registered yet</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            students.forEach(student => {
+                const row = `
+                    <tr>
+                        <td>${student.rollNumber}</td>
+                        <td>${student.name}</td>
+                        <td>${student.className}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        /* ===== LOAD ATTENDANCE ===== */
+        async function loadAttendance() {
+            let attendance = [];
+            
+            if (useBackend) {
+                try {
+                    const response = await fetch(`${API_URL}?action=getAttendance`);
+                    const data = await response.json();
+                    if (data.success && data.attendance) {
+                        attendance = data.attendance;
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch attendance:', error);
+                    attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+                }
+            } else {
+                attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            }
+            
+            const tbody = document.getElementById('attendanceBody');
+            
+            if (attendance.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #6c757d;">No attendance records yet</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            const sortedAttendance = [...attendance].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            sortedAttendance.forEach(record => {
+                const statusClass = record.status === 'Present' ? 'status-present' : 'status-absent';
+                const row = `
+                    <tr>
+                        <td>${record.rollNumber}</td>
+                        <td>${record.date}</td>
+                        <td class="${statusClass}">${record.status}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        /* ===== CALCULATE STATISTICS ===== */
+        async function handleCalculateStats(e) {
+            e.preventDefault();
+            
+            const rollNumber = document.getElementById('statsRollNumber').value.trim();
+            
+            if (!rollNumber) {
+                showAlert('stats-alert', 'Please enter roll number!', 'error');
+                return;
+            }
+            
+            let stats = null;
+            
+            if (useBackend) {
+                try {
+                    const response = await fetch(`${API_URL}?action=getStatistics&rollNumber=${encodeURIComponent(rollNumber)}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        if (data.totalClasses === 0) {
+                            showAlert('stats-alert', 'No attendance records found for this student!', 'info');
+                            document.getElementById('statsResult').style.display = 'none';
+                            return;
+                        }
+                        stats = data;
+                    } else {
+                        showAlert('stats-alert', `❌ ${data.error}`, 'error');
+                        document.getElementById('statsResult').style.display = 'none';
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Backend error:', error);
+                    useBackend = false;
+                    updateConnectionStatus(false);
+                }
+            }
+            
+            if (!stats) {
+                // Calculate from localStorage
+                const students = JSON.parse(localStorage.getItem('students') || '[]');
+                if (!students.some(s => s.rollNumber === rollNumber)) {
+                    showAlert('stats-alert', 'Student not found!', 'error');
+                    document.getElementById('statsResult').style.display = 'none';
+                    return;
+                }
+                
+                const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+                const studentAttendance = attendance.filter(a => a.rollNumber === rollNumber);
+                
+                if (studentAttendance.length === 0) {
+                    showAlert('stats-alert', 'No attendance records found for this student!', 'info');
+                    document.getElementById('statsResult').style.display = 'none';
+                    return;
+                }
+                
+                const totalClasses = studentAttendance.length;
+                const presentCount = studentAttendance.filter(a => a.status === 'Present').length;
+                const absentCount = studentAttendance.filter(a => a.status === 'Absent').length;
+                const percentage = ((presentCount / totalClasses) * 100).toFixed(2);
+                
+                stats = { totalClasses, presentCount, absentCount, percentage };
+            }
+            
+            // Display results
+            document.getElementById('totalClasses').textContent = stats.totalClasses;
+            document.getElementById('presentCount').textContent = stats.presentCount;
+            document.getElementById('absentCount').textContent = stats.absentCount;
+            document.getElementById('percentage').textContent = stats.percentage + '%';
+            
+            // Show status
+            const statusDiv = document.getElementById('attendanceStatus');
+            if (stats.percentage >= 75) {
+                statusDiv.innerHTML = '✅ Status: GOOD (Attendance above 75%)';
+                statusDiv.style.color = '#28a745';
+            } else {
+                statusDiv.innerHTML = '⚠️ Status: WARNING (Attendance below 75%)';
+                statusDiv.style.color = '#dc3545';
+            }
+            
+            document.getElementById('statsResult').style.display = 'block';
+            showAlert('stats-alert', `Statistics calculated for Roll No: ${rollNumber}`, 'success');
+        }
+
+        /* ===== ALERT SYSTEM ===== */
+        function showAlert(elementId, message, type) {
+            const alertDiv = document.getElementById(elementId);
+            const alertClass = type === 'error' ? 'alert-error' : 
+                              type === 'success' ? 'alert-success' : 
+                              type === 'warning' ? 'alert-warning' : 'alert-info';
+            
+            alertDiv.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+            
+            setTimeout(() => {
+                alertDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        /* ===== LOCAL STORAGE ===== */
+        function saveToLocalStorage(type, data) {
+            const key = type; // 'students' or 'attendance'
+            let items = JSON.parse(localStorage.getItem(key) || '[]');
+            items.push(data);
+            localStorage.setItem(key, JSON.stringify(items));
+        }
+
+        function loadFromLocalStorage() {
+            // This is called on page load for fallback
+            // Data will be displayed when user clicks refresh buttons
+        }
+    </script>
+</body>
+</html>
